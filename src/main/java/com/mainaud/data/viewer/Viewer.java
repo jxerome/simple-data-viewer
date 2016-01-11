@@ -12,8 +12,8 @@ import javax.inject.Inject;
 import java.awt.Desktop;
 import java.io.IOException;
 import java.net.URI;
-import java.nio.file.Paths;
-import java.util.Collections;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Viewer {
@@ -24,7 +24,7 @@ public class Viewer {
     private boolean help;
 
     @Parameter(description = "Files", required = true)
-    private List<String> files = Collections.emptyList();
+    private List<Path> files = new ArrayList<>();
 
     /**
      * When {@true} the browser is not launched at startup. Usefull for testing.
@@ -87,7 +87,6 @@ public class Viewer {
 
     private boolean checkFiles() {
         long countInvalidFiles = files.stream()
-            .map(Paths::get)
             .filter(p -> !fileService.checkFile(p))
             .peek(p -> System.err.println("Invalid file " + p))
             .count();
