@@ -8,6 +8,7 @@ import com.google.inject.Injector;
 import net.codestory.http.WebServer;
 import net.codestory.http.injection.GuiceAdapter;
 
+import javax.inject.Inject;
 import java.awt.Desktop;
 import java.io.IOException;
 import java.net.URI;
@@ -22,7 +23,7 @@ public class Viewer {
     @Parameter(names = {"-h", "--help"}, description = "Print Help", help = true)
     private boolean help;
 
-    @Parameter(description = "Files", required = false)
+    @Parameter(description = "Files", required = true)
     private List<String> files = Collections.emptyList();
 
     /**
@@ -31,6 +32,9 @@ public class Viewer {
     private boolean noBrowser;
     private Injector injector;
     private WebServer webServer;
+
+    @Inject
+    private FileService fileService;
 
     public int getPort() {
         return port;
@@ -63,7 +67,7 @@ public class Viewer {
     }
 
     public void start() {
-        createInjector();
+        initContainer();
         if (checkFiles()) {
             startRestServer();
             if (!noBrowser) {
@@ -76,13 +80,12 @@ public class Viewer {
         webServer.stop();
     }
 
-    private void createInjector() {
+    private void initContainer() {
         injector = Guice.createInjector(new ViewerModule());
+        injector.injectMembers(this);
     }
 
     private boolean checkFiles() {
-        FileService fileService = injector.getInstance(FileService.class);
-
         long countInvalidFiles = files.stream()
             .map(Paths::get)
             .filter(p -> !fileService.checkFile(p))
@@ -92,6 +95,7 @@ public class Viewer {
         if (countInvalidFiles > 0) {
             System.err.println(String.format("%d invalid files", countInvalidFiles));
         }
+
         return countInvalidFiles == 0;
     }
 
