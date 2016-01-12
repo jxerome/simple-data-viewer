@@ -5,6 +5,7 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.mainaud.function.Result;
 import net.codestory.http.WebServer;
 import net.codestory.http.injection.GuiceAdapter;
 
@@ -68,7 +69,7 @@ public class Viewer {
 
     public void start() {
         initContainer();
-        if (checkFiles()) {
+        if (openFiles()) {
             startRestServer();
             if (!noBrowser) {
                 openWebPage();
@@ -85,10 +86,11 @@ public class Viewer {
         injector.injectMembers(this);
     }
 
-    private boolean checkFiles() {
+    private boolean openFiles() {
         long countInvalidFiles = files.stream()
-            .filter(p -> !fileService.checkFile(p))
-            .peek(p -> System.err.println("Invalid file " + p))
+            .map(fileService::openFile)
+            .filter(Result::isFailure)
+            .peek(p -> System.err.println("Invalid file " + p.getError()))
             .count();
 
         if (countInvalidFiles > 0) {
