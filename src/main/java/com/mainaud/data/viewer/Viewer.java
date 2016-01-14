@@ -3,11 +3,11 @@ package com.mainaud.data.viewer;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 import com.mainaud.function.Result;
 import net.codestory.http.WebServer;
-import net.codestory.http.injection.GuiceAdapter;
+import net.codestory.http.injection.SpringAdapter;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import javax.inject.Inject;
 import java.awt.Desktop;
@@ -31,7 +31,7 @@ public class Viewer {
      * When {@true} the browser is not launched at startup. Usefull for testing.
      */
     private boolean noBrowser;
-    private Injector injector;
+    private ConfigurableApplicationContext context;
     private WebServer webServer;
 
     @Inject
@@ -78,12 +78,18 @@ public class Viewer {
     }
 
     public void stop() {
-        webServer.stop();
+        if (webServer != null) {
+            webServer.stop();
+        }
+        if (context != null && context.isActive()) {
+            context.close();
+        }
     }
 
     private void initContainer() {
-        injector = Guice.createInjector(new ViewerModule());
-        injector.injectMembers(this);
+        context = new AnnotationConfigApplicationContext(SpringConfiguration.class);
+        context.registerShutdownHook();
+        context.getBeanFactory().autowireBean(this);
     }
 
     private boolean openFiles() {
@@ -102,7 +108,7 @@ public class Viewer {
 
     private void startRestServer() {
         webServer = new WebServer();
-        webServer.configure(routes -> routes.setIocAdapter(new GuiceAdapter(injector)));
+        webServer.configure(routes -> routes.setIocAdapter(new SpringAdapter(context)));
 
         if (port == 0) {
             webServer.startOnRandomPort();

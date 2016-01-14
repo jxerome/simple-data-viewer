@@ -6,6 +6,7 @@ package com.mainaud.function;
  * @param <T> Object type.
  * @param <E> Exception type.
  */
+@FunctionalInterface
 public interface ConsumerWithException<T, E extends Exception> {
     void accept(T t) throws E;
 }
