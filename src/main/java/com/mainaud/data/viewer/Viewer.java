@@ -17,6 +17,7 @@ import java.net.URI;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class Viewer {
     @Parameter(names = {"-p", "--port"}, description = "HTTP server port")
@@ -116,6 +117,8 @@ public class Viewer {
         webServer.configure(routes ->
             routes.setIocAdapter(new SpringAdapter(context))
                 .get("/table", () -> new Response().withTables(dataService.listTables()))
+                .get("/table/:tableId/variable", (ctx, tableId) -> new Response().withColumns(dataService.listVariableColumns(UUID.fromString(tableId))))
+                .get("/table/:tableId/value", (ctx, tableId) -> new Response().withColumns(dataService.listValueColumns(UUID.fromString(tableId))))
         );
 
         if (port == 0) {

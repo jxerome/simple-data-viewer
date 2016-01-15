@@ -8,11 +8,14 @@ ng-app: simpleDataViewer
 
 <div class="main-panel-content" data-ng-controller="dataViewerCtrl">
     <label for="dataTable">Table</label><select id="dataTable" data-ng-model="selectedTable" data-ng-options="tableLabel(table) for table in tables"></select>
+    <label for="dataVariable">Variable</label><select id="dataVariable" data-ng-model="selectedVariable" data-ng-options="columnLabel(variable) for variable in variables"></select>
 
     <div class="data">
         <dl>
             <dt>Table</dt>
             <dd>{{tableLabel(selectedTable)}}</dd>
+            <dt>Variable</dt>
+            <dd>{{columnLabel(selectedVariable)}}</dd>
         </dl>
     </div>
 </div>

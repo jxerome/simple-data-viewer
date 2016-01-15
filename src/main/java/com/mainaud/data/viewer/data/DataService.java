@@ -21,12 +21,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
-import java.util.SortedMap;
+import java.util.UUID;
 import java.util.concurrent.CompletionException;
-import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
+
+import static java.util.Comparator.comparing;
 
 /**
  * Service that check and load files.
@@ -38,7 +40,7 @@ public class DataService {
 
     public static final byte[] SQLITE_HEADER = {0x53, 0x51, 0x4c, 0x69, 0x74, 0x65, 0x20, 0x66, 0x6f, 0x72, 0x6d, 0x61, 0x74, 0x20, 0x33, 0x00};
 
-    private final SortedMap<Path, DataFile> dataFiles = new ConcurrentSkipListMap<>();
+    private final List<DataFile> dataFiles = new CopyOnWriteArrayList<>();
 
     /**
      * Check if the withFile is a valid sqlite withFile.
@@ -47,8 +49,8 @@ public class DataService {
         return Files.isReadable(path) && Files.isRegularFile(path) && isSqliteFile(path);
     }
 
-    public Optional<DataFile> getFile(Path path) {
-        return Optional.ofNullable(dataFiles.get(path));
+    public List<DataFile> getFiles() {
+        return dataFiles;
     }
 
     /**
@@ -63,30 +65,32 @@ public class DataService {
         }
 
         try {
-            dataFiles.computeIfAbsent(path, TryTo.apply(p -> {
-                Connection connection = openConnection(path);
+            Connection connection = openConnection(path);
 
-                return DataFile.create(TryTo.accept(schema -> {
-                    schema.withPath(path);
-                    schema.withConnection(connection);
-                    executeSimpleQuery(connection, "SELECT name FROM sqlite_master WHERE type = 'table'", rst ->
-                        schema.createTable(TryTo.accept(table -> {
-                            String tableName = rst.getString("name");
-                            table.withName(tableName);
-                            executeSimpleQuery(connection, "pragma table_info(" + tableName + ")", rsc ->
-                                table.createColumn(TryTo.accept(column ->
-                                    column.withName(rsc.getString("name"))
-                                        .withType(DataType.of(rsc.getString("type")))
-                                ))
-                            );
-                        }))
-                    );
-                }));
+            DataFile dataFile = DataFile.create(TryTo.accept(schema -> {
+                schema.withRandomId();
+                schema.withPath(path);
+                schema.withConnection(connection);
+                executeSimpleQuery(connection, "SELECT name FROM sqlite_master WHERE type = 'table'", rst ->
+                    schema.createTable(TryTo.accept(table -> {
+                        table.withRandomId();
+                        String tableName = rst.getString("name");
+                        table.withName(tableName);
+                        executeSimpleQuery(connection, "pragma table_info(" + tableName + ")", rsc ->
+                            table.createColumn(TryTo.accept(column ->
+                                column.withRandomId()
+                                    .withName(rsc.getString("name"))
+                                    .withType(DataType.of(rsc.getString("type")))
+                            ))
+                        );
+                    }))
+                );
             }));
+            dataFiles.add(dataFile);
 
             return Result.success();
 
-        } catch (CompletionException e) {
+        } catch (CompletionException | ClassNotFoundException | SQLException e) {
             LOG.error("Erreur de lecture du fichier {}", path, e);
             return Result.failure(path);
         }
@@ -110,7 +114,7 @@ public class DataService {
     @PreDestroy
     public void close() {
         LOG.info("Close FileService");
-        for (DataFile dataFile : dataFiles.values()) {
+        for (DataFile dataFile : dataFiles) {
             try {
                 dataFile.getConnection().close();
             } catch (SQLException e) {
@@ -134,10 +138,31 @@ public class DataService {
     }
 
     public List<Table> listTables() {
-        return dataFiles.values().stream()
+        return dataFiles.stream()
             .flatMap(f -> f.getTables().stream())
             .map(Table::new)
+            .sorted(comparing(Table::getName)
+                .thenComparing(Table::getFile)
+                .thenComparing(Table::getFolder, Comparator.nullsFirst(Comparator.naturalOrder())))
             .collect(Collectors.toList());
     }
 
+    public List<Column> listVariableColumns(UUID tableId) {
+        return listColumns(tableId, DataType.VARIABLE);
+    }
+
+    public List<Column> listValueColumns(UUID tableId) {
+        return listColumns(tableId, DataType.VALUE);
+    }
+
+    private List<Column> listColumns(UUID tableId, DataType type) {
+        return dataFiles.stream()
+                .flatMap(f -> f.getTables().stream())
+                .filter(t -> t.getId().equals(tableId))
+                .flatMap(t -> t.getColumns().stream())
+                .filter(c -> c.getType().equals(type))
+                .map(Column::new)
+                .sorted(comparing(Column::getName))
+                .collect(Collectors.toList());
+    }
 }

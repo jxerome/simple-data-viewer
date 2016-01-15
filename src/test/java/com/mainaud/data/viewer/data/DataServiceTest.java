@@ -16,6 +16,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -62,17 +64,23 @@ public class DataServiceTest {
     @Test
     public void openFileShouldExtractSchemaInfo() throws SQLException, URISyntaxException {
         assertThat(result.isSuccess()).isTrue();
-        assertThat(dataService.getFile(dbpath)).isPresent();
+        assertThat(dataService.getFiles()).hasSize(1);
 
-        DataFile actualFile = dataService.getFile(dbpath).get();
+        DataFile actualFile = dataService.getFiles().get(0);
+        assertThat(actualFile.getId()).isNotNull();
         assertThat(actualFile.getPath()).isEqualTo(dbpath);
         assertThat(actualFile.getConnection().isValid(10000));
 
         List<DataTable> tables = actualFile.getTables();
-        assertThat(tables).extracting(DataTable::getName).containsExactly("compta", "personne");
-        assertThat(tables).extracting(DataTable::getFile).contains(actualFile, actualFile);
+        assertThat(tables).extracting(DataTable::getId).doesNotContainNull();
+        assertThat(tables)
+            .extracting(DataTable::getName, DataTable::getFile)
+            .containsExactly(
+                tuple("compta", actualFile),
+                tuple("personne", actualFile));
 
         List<DataColumn> columns = tables.stream().flatMap(t -> t.getColumns().stream()).collect(Collectors.toList());
+        assertThat(columns).extracting(DataColumn::getId).doesNotContainNull();
         assertThat(columns)
             .extracting(DataColumn::getName, DataColumn::getType)
             .containsExactly(
@@ -88,8 +96,35 @@ public class DataServiceTest {
     public void listTablesShouldProvideTables() {
         assertThat(dataService.listTables())
             .extracting(Table::getName, Table::getFile, Table::getFolder)
-            .containsOnly(
+            .containsExactly(
                 tuple("compta", "empty.db", dbpath.getParent().toString()),
                 tuple("personne", "empty.db", dbpath.getParent().toString()));
+    }
+
+    @Test
+    public void listVariableColumnsShouldProvideVariables() {
+        Optional<DataTable> table = dataService.getFiles().get(0).getTables().stream().filter(t -> t.getName().equals("personne")).findFirst();
+        UUID id = table.get().getId();
+
+        List<Column> actual = dataService.listVariableColumns(id);
+
+        assertThat(actual)
+            .extracting(Column::getName, Column::getType)
+            .containsExactly(
+                tuple("nom", "VARIABLE"),
+                tuple("prenom", "VARIABLE"));
+    }
+
+    @Test
+    public void listValueColumnsShouldProvideValues() {
+        Optional<DataTable> table = dataService.getFiles().get(0).getTables().stream().filter(t -> t.getName().equals("personne")).findFirst();
+        UUID id = table.get().getId();
+
+        List<Column> actual = dataService.listValueColumns(id);
+
+        assertThat(actual)
+            .extracting(Column::getName, Column::getType)
+            .containsExactly(
+                tuple("age", "VALUE"));
     }
 }
