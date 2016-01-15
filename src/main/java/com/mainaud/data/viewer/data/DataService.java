@@ -1,9 +1,7 @@
-package com.mainaud.data.viewer;
+package com.mainaud.data.viewer.data;
 
-import com.mainaud.data.viewer.dto.Table;
-import com.mainaud.data.viewer.schema.DataFile;
-import com.mainaud.data.viewer.schema.DataTable;
-import com.mainaud.data.viewer.schema.DataType;
+import com.mainaud.data.viewer.data.schema.DataFile;
+import com.mainaud.data.viewer.data.schema.DataType;
 import com.mainaud.function.ConsumerWithException;
 import com.mainaud.function.Result;
 import com.mainaud.function.TryTo;
@@ -43,7 +41,7 @@ public class DataService {
     private final SortedMap<Path, DataFile> dataFiles = new ConcurrentSkipListMap<>();
 
     /**
-     * Check if the file is a valid sqlite file.
+     * Check if the withFile is a valid sqlite withFile.
      */
     public boolean checkFile(Path path) {
         return Files.isReadable(path) && Files.isRegularFile(path) && isSqliteFile(path);
@@ -56,8 +54,8 @@ public class DataService {
     /**
      * Open File and load meta data.
      *
-     * @param path File path.
-     * @return Result with failed path.
+     * @param path File withPath.
+     * @return Result with failed withPath.
      */
     public Result<Void, Path> openFile(Path path) {
         if (!checkFile(path)) {
@@ -69,16 +67,16 @@ public class DataService {
                 Connection connection = openConnection(path);
 
                 return DataFile.create(TryTo.accept(schema -> {
-                    schema.path(path);
-                    schema.connection(connection);
+                    schema.withPath(path);
+                    schema.withConnection(connection);
                     executeSimpleQuery(connection, "SELECT name FROM sqlite_master WHERE type = 'table'", rst ->
                         schema.createTable(TryTo.accept(table -> {
                             String tableName = rst.getString("name");
-                            table.name(tableName);
+                            table.withName(tableName);
                             executeSimpleQuery(connection, "pragma table_info(" + tableName + ")", rsc ->
                                 table.createColumn(TryTo.accept(column ->
-                                    column.name(rsc.getString("name"))
-                                        .type(DataType.of(rsc.getString("type")))
+                                    column.withName(rsc.getString("name"))
+                                        .withType(DataType.of(rsc.getString("type")))
                                 ))
                             );
                         }))
@@ -138,10 +136,8 @@ public class DataService {
     public List<Table> listTables() {
         return dataFiles.values().stream()
             .flatMap(f -> f.getTables().stream())
-            .map(t -> {
-                Path path = t.getFile().getPath();
-                return new Table(t.getName(), path.getFileName().toString(), path.getParent().toString());
-            })
+            .map(Table::new)
             .collect(Collectors.toList());
     }
+
 }

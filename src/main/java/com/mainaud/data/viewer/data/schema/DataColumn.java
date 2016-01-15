@@ -1,15 +1,25 @@
-package com.mainaud.data.viewer.schema;
+package com.mainaud.data.viewer.data.schema;
 
+import com.mainaud.data.viewer.data.WithId;
+import com.mainaud.data.viewer.data.WithIdBuilder;
+
+import java.util.UUID;
 import java.util.function.Consumer;
 
 import static java.util.Objects.requireNonNull;
 
-public final class DataColumn implements InFile {
+public final class DataColumn implements WithFile, WithId {
+    private UUID id;
     private String name;
     private DataType type;
     private DataTable table;
 
     private DataColumn() {
+    }
+
+    @Override
+    public UUID getId() {
+        return id;
     }
 
     public String getName() {
@@ -41,20 +51,26 @@ public final class DataColumn implements InFile {
         return column;
     }
 
-    public static final class Schema {
+    public static final class Schema implements WithIdBuilder<Schema> {
         private DataColumn column = new DataColumn();
 
-        public Schema name(String name) {
+        @Override
+        public Schema withId(UUID id) {
+            column.id = requireNonNull(id);
+            return this;
+        }
+
+        public Schema withName(String name) {
             column.name = requireNonNull(name);
             return this;
         }
 
-        public Schema type(DataType type) {
+        public Schema withType(DataType type) {
             column.type = requireNonNull(type);
             return this;
         }
 
-        public Schema table(DataTable table) {
+        public Schema withTable(DataTable table) {
             column.table = requireNonNull(table);
             return this;
         }

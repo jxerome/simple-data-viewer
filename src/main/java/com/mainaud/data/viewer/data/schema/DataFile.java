@@ -1,24 +1,31 @@
-package com.mainaud.data.viewer.schema;
+package com.mainaud.data.viewer.data.schema;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.mainaud.data.viewer.data.WithIdBuilder;
 
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 import static java.util.Objects.requireNonNull;
 
 /**
- * A data file.
+ * A data withFile.
  */
-public final class DataFile implements InFile {
+public final class DataFile implements WithFile {
+    private UUID id;
     private Path path;
     private Connection connection;
     private final List<DataTable> tables = new ArrayList<>();
 
     private DataFile() {
+    }
+
+    public UUID getId() {
+        return id;
     }
 
     public Path getPath() {
@@ -49,22 +56,28 @@ public final class DataFile implements InFile {
         return file;
     }
 
-    public static final class Schema {
+    public static final class Schema implements WithIdBuilder<Schema> {
         DataFile file = new DataFile();
 
-        public Schema path(Path path) {
+        @Override
+        public Schema withId(UUID id) {
+            file.id = requireNonNull(id);
+            return this;
+        }
+
+        public Schema withPath(Path path) {
             file.path = requireNonNull(path);
             return this;
         }
 
-        public Schema connection(Connection connection) {
+        public Schema withConnection(Connection connection) {
             file.connection = requireNonNull(connection);
             return this;
         }
 
         public Schema createTable(Consumer<DataTable.Schema> builder) {
             file.tables.add(DataTable.create(t -> {
-                t.file(file);
+                t.withFile(file);
                 builder.accept(t);
             }));
             return this;

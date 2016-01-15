@@ -1,8 +1,12 @@
-package com.mainaud.data.viewer.schema;
+package com.mainaud.data.viewer.data.schema;
 
+
+import com.mainaud.data.viewer.data.WithId;
+import com.mainaud.data.viewer.data.WithIdBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 import static java.util.Objects.requireNonNull;
@@ -10,12 +14,18 @@ import static java.util.Objects.requireNonNull;
 /**
  * A Data table.
  */
-public final class DataTable implements InFile {
+public final class DataTable implements WithFile, WithId {
+    private UUID id;
     private String name;
     private DataFile file;
     private final List<DataColumn> columns = new ArrayList<>();
 
     private DataTable() {
+    }
+
+    @Override
+    public UUID getId() {
+        return id;
     }
 
     public String getName() {
@@ -43,22 +53,28 @@ public final class DataTable implements InFile {
 
     }
 
-    public static final class Schema {
+    public static final class Schema implements WithIdBuilder<Schema> {
         private DataTable table = new DataTable();
 
-        public Schema name(String name) {
+        @Override
+        public Schema withId(UUID id) {
+            table.id = requireNonNull(id);
+            return this;
+        }
+
+        public Schema withName(String name) {
             table.name = requireNonNull(name);
             return this;
         }
 
-        public Schema file(DataFile file) {
+        public Schema withFile(DataFile file) {
             table.file = requireNonNull(file);
             return this;
         }
 
         public Schema createColumn(Consumer<DataColumn.Schema> builder) {
             table.columns.add(DataColumn.create(c -> {
-                c.table(table);
+                c.withTable(table);
                 builder.accept(c);
             }));
             return this;

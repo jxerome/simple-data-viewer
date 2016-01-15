@@ -1,4 +1,4 @@
-package com.mainaud.data.viewer.schema;
+package com.mainaud.data.viewer.data.schema;
 
 import org.testng.annotations.Test;
 

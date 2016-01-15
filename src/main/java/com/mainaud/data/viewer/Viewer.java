@@ -3,6 +3,7 @@ package com.mainaud.data.viewer;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
+import com.mainaud.data.viewer.data.DataService;
 import com.mainaud.function.Result;
 import net.codestory.http.WebServer;
 import net.codestory.http.injection.SpringAdapter;
@@ -25,7 +26,7 @@ public class Viewer {
     private boolean help;
 
     @Parameter(description = "Files", required = true)
-    private List<Path> files = new ArrayList<>();
+    private final List<Path> files = new ArrayList<>();
 
     /**
      * When {@true} the browser is not launched at startup. Usefull for testing.
@@ -47,6 +48,10 @@ public class Viewer {
 
     public void noBrowser() {
         this.noBrowser = true;
+    }
+
+    public void addFile(Path path) {
+        files.add(path);
     }
 
     public static void main(String[] args) {
@@ -96,7 +101,7 @@ public class Viewer {
         long countInvalidFiles = files.stream()
             .map(dataService::openFile)
             .filter(Result::isFailure)
-            .peek(p -> System.err.println("Invalid file " + p.getError()))
+            .peek(p -> System.err.println("Invalid withFile " + p.getError()))
             .count();
 
         if (countInvalidFiles > 0) {
@@ -110,7 +115,7 @@ public class Viewer {
         webServer = new WebServer();
         webServer.configure(routes ->
             routes.setIocAdapter(new SpringAdapter(context))
-                .get("/tables", () -> dataService.listTables())
+                .get("/tables", () -> new Response().withTables(dataService.listTables()))
         );
 
         if (port == 0) {

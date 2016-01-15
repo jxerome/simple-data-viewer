@@ -1,4 +1,4 @@
-package com.mainaud.data.viewer.schema;
+package com.mainaud.data.viewer.data.schema;
 
 public enum DataType {
     VARIABLE,

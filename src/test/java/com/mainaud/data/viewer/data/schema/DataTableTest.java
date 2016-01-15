@@ -1,4 +1,4 @@
-package com.mainaud.data.viewer.schema;
+package com.mainaud.data.viewer.data.schema;
 
 import org.testng.annotations.Test;
 
@@ -10,10 +10,10 @@ public class DataTableTest {
 
     @Test
     public void createShouldCreateDataTable() {
-        DataFile file = DataFile.create(schema -> schema.path(Paths.get("path")));
-        DataTable table = DataTable.create(schema -> schema.name("name").file(file).createColumn(c -> c.name("col").type(DataType.OTHER)));
+        DataFile file = DataFile.create(schema -> schema.withPath(Paths.get("withPath")));
+        DataTable table = DataTable.create(schema -> schema.withName("withName").withFile(file).createColumn(c -> c.withName("col").withType(DataType.OTHER)));
 
-        assertThat(table.getName()).isEqualTo("name");
+        assertThat(table.getName()).isEqualTo("withName");
         assertThat(table.getFile()).isSameAs(file);
         assertThat(table.getColumns()).hasSize(1);
 
@@ -25,14 +25,14 @@ public class DataTableTest {
 
     @Test
     public void createShouldCreateAllColumns() {
-        DataFile file = DataFile.create(schema -> schema.path(Paths.get("path")));
+        DataFile file = DataFile.create(schema -> schema.withPath(Paths.get("withPath")));
         DataTable table = DataTable.create(schema ->
-            schema.name("name")
-                .file(file)
-                .createColumn(c -> c.name("a").type(DataType.VARIABLE))
-                .createColumn(c -> c.name("b").type(DataType.VALUE)));
+            schema.withName("withName")
+                .withFile(file)
+                .createColumn(c -> c.withName("a").withType(DataType.VARIABLE))
+                .createColumn(c -> c.withName("b").withType(DataType.VALUE)));
 
-        assertThat(table.getName()).isEqualTo("name");
+        assertThat(table.getName()).isEqualTo("withName");
         assertThat(table.getFile()).isSameAs(file);
         assertThat(table.getColumns()).hasSize(2);
 
