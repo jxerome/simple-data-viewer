@@ -35,7 +35,7 @@ public class Viewer {
     private WebServer webServer;
 
     @Inject
-    private FileService fileService;
+    private DataService dataService;
 
     public int getPort() {
         return port;
@@ -94,7 +94,7 @@ public class Viewer {
 
     private boolean openFiles() {
         long countInvalidFiles = files.stream()
-            .map(fileService::openFile)
+            .map(dataService::openFile)
             .filter(Result::isFailure)
             .peek(p -> System.err.println("Invalid file " + p.getError()))
             .count();
@@ -108,7 +108,10 @@ public class Viewer {
 
     private void startRestServer() {
         webServer = new WebServer();
-        webServer.configure(routes -> routes.setIocAdapter(new SpringAdapter(context)));
+        webServer.configure(routes ->
+            routes.setIocAdapter(new SpringAdapter(context))
+                .get("/tables", () -> dataService.listTables())
+        );
 
         if (port == 0) {
             webServer.startOnRandomPort();

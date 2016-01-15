@@ -1,7 +1,9 @@
 package com.mainaud.data.viewer;
 
-import com.mainaud.data.viewer.data.DataFile;
-import com.mainaud.data.viewer.data.DataType;
+import com.mainaud.data.viewer.dto.Table;
+import com.mainaud.data.viewer.schema.DataFile;
+import com.mainaud.data.viewer.schema.DataTable;
+import com.mainaud.data.viewer.schema.DataType;
 import com.mainaud.function.ConsumerWithException;
 import com.mainaud.function.Result;
 import com.mainaud.function.TryTo;
@@ -21,18 +23,20 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.SortedMap;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.stream.Collectors;
 
 /**
  * Service that check and load files.
  */
 @Singleton
 @Service
-public class FileService {
-    private static final Logger LOG = LoggerFactory.getLogger(FileService.class);
+public class DataService {
+    private static final Logger LOG = LoggerFactory.getLogger(DataService.class);
 
     public static final byte[] SQLITE_HEADER = {0x53, 0x51, 0x4c, 0x69, 0x74, 0x65, 0x20, 0x66, 0x6f, 0x72, 0x6d, 0x61, 0x74, 0x20, 0x33, 0x00};
 
@@ -129,5 +133,15 @@ public class FileService {
             LOG.error("IO Exception while reading {}", path, e);
             return false;
         }
+    }
+
+    public List<Table> listTables() {
+        return dataFiles.values().stream()
+            .flatMap(f -> f.getTables().stream())
+            .map(t -> {
+                Path path = t.getFile().getPath();
+                return new Table(t.getName(), path.getFileName().toString(), path.getParent().toString());
+            })
+            .collect(Collectors.toList());
     }
 }

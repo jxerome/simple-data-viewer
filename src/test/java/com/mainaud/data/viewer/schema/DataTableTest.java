@@ -1,4 +1,4 @@
-package com.mainaud.data.viewer.data;
+package com.mainaud.data.viewer.schema;
 
 import org.testng.annotations.Test;
 
@@ -17,7 +17,7 @@ public class DataTableTest {
         assertThat(table.getFile()).isSameAs(file);
         assertThat(table.getColumns()).hasSize(1);
 
-        DataColumn actualColumn = table.getColumns().first();
+        DataColumn actualColumn = table.getColumns().get(0);
         assertThat(actualColumn.getName()).isEqualTo("col");
         assertThat(actualColumn.getType()).isEqualTo(DataType.OTHER);
         assertThat(actualColumn.getTable()).isSameAs(table);
@@ -36,12 +36,12 @@ public class DataTableTest {
         assertThat(table.getFile()).isSameAs(file);
         assertThat(table.getColumns()).hasSize(2);
 
-        DataColumn firstColumn = table.getColumns().first();
+        DataColumn firstColumn = table.getColumns().get(0);
         assertThat(firstColumn.getName()).isEqualTo("a");
         assertThat(firstColumn.getType()).isEqualTo(DataType.VARIABLE);
         assertThat(firstColumn.getTable()).isSameAs(table);
 
-        DataColumn lastColumn = table.getColumns().last();
+        DataColumn lastColumn = table.getColumns().get(1);
         assertThat(lastColumn.getName()).isEqualTo("b");
         assertThat(lastColumn.getType()).isEqualTo(DataType.VALUE);
         assertThat(lastColumn.getTable()).isSameAs(table);

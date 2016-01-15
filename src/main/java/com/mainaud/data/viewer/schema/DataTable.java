@@ -1,10 +1,8 @@
-package com.mainaud.data.viewer.data;
+package com.mainaud.data.viewer.schema;
 
 
-import java.util.Comparator;
-import java.util.Objects;
-import java.util.SortedSet;
-import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 import static java.util.Objects.requireNonNull;
@@ -12,12 +10,10 @@ import static java.util.Objects.requireNonNull;
 /**
  * A Data table.
  */
-public final class DataTable implements InFile, Comparable<DataTable> {
-    public static final Comparator<DataTable> COMPARATOR = Comparator.comparing((DataTable t) -> t.name).thenComparing(t -> t.file);
-
+public final class DataTable implements InFile {
     private String name;
     private DataFile file;
-    private final SortedSet<DataColumn> columns = new ConcurrentSkipListSet<>();
+    private final List<DataColumn> columns = new ArrayList<>();
 
     private DataTable() {
     }
@@ -31,27 +27,8 @@ public final class DataTable implements InFile, Comparable<DataTable> {
         return file;
     }
 
-    public SortedSet<DataColumn> getColumns() {
+    public List<DataColumn> getColumns() {
         return columns;
-    }
-
-    @Override
-    public int compareTo(DataTable that) {
-        return COMPARATOR.compare(this, that);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof DataTable)) return false;
-        DataTable that = (DataTable) o;
-        return Objects.equals(name, that.name) &&
-            Objects.equals(file, that.file);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(name, file);
     }
 
     public static DataTable create(Consumer<Schema> builder) {
@@ -80,7 +57,10 @@ public final class DataTable implements InFile, Comparable<DataTable> {
         }
 
         public Schema createColumn(Consumer<DataColumn.Schema> builder) {
-            table.columns.add(DataColumn.create(c -> {c.table(table); builder.accept(c); }));
+            table.columns.add(DataColumn.create(c -> {
+                c.table(table);
+                builder.accept(c);
+            }));
             return this;
         }
     }

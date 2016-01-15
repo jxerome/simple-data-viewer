@@ -1,10 +1,11 @@
-package com.mainaud.data.viewer.data;
+package com.mainaud.data.viewer.schema;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.nio.file.Path;
 import java.sql.Connection;
-import java.util.Objects;
-import java.util.SortedSet;
-import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 import static java.util.Objects.requireNonNull;
@@ -12,10 +13,10 @@ import static java.util.Objects.requireNonNull;
 /**
  * A data file.
  */
-public final class DataFile implements InFile, Comparable<DataFile> {
+public final class DataFile implements InFile {
     private Path path;
     private Connection connection;
-    private final SortedSet<DataTable> tables = new ConcurrentSkipListSet<>();
+    private final List<DataTable> tables = new ArrayList<>();
 
     private DataFile() {
     }
@@ -24,35 +25,19 @@ public final class DataFile implements InFile, Comparable<DataFile> {
         return path;
     }
 
+    @JsonIgnore
     public Connection getConnection() {
         return connection;
     }
 
-    public SortedSet<DataTable> getTables() {
+    @JsonIgnore
+    public List<DataTable> getTables() {
         return tables;
     }
 
     @Override
     public DataFile getFile() {
         return this;
-    }
-
-    @Override
-    public int compareTo(DataFile that) {
-        return this.path.compareTo(that.path);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof DataFile)) return false;
-        DataFile that = (DataFile) o;
-        return Objects.equals(path, that.path);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(path);
     }
 
     public static DataFile create(Consumer<Schema> builder) {
@@ -78,7 +63,10 @@ public final class DataFile implements InFile, Comparable<DataFile> {
         }
 
         public Schema createTable(Consumer<DataTable.Schema> builder) {
-            file.tables.add(DataTable.create(t -> { t.file(file); builder.accept(t); }));
+            file.tables.add(DataTable.create(t -> {
+                t.file(file);
+                builder.accept(t);
+            }));
             return this;
         }
     }
