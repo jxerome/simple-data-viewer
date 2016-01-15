@@ -1,0 +1,11 @@
+ul.criteria {
+    list-style: none;
+    padding-left: 20px;
+}
+
+.criteria label {
+    display: inline-block;
+    text-align: right;
+    padding-right: 1ex;
+    width: 10ex;
+}

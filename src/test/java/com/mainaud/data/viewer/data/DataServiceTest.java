@@ -89,7 +89,8 @@ public class DataServiceTest {
                 tuple("montant", DataType.VALUE),
                 tuple("prenom", DataType.VARIABLE),
                 tuple("nom", DataType.VARIABLE),
-                tuple("age", DataType.VALUE));
+                tuple("age", DataType.VALUE),
+                tuple("salaire", DataType.VALUE));
     }
 
     @Test
@@ -125,6 +126,7 @@ public class DataServiceTest {
         assertThat(actual)
             .extracting(Column::getName, Column::getType)
             .containsExactly(
-                tuple("age", "VALUE"));
+                tuple("age", "VALUE"),
+                tuple("salaire", "VALUE"));
     }
 }

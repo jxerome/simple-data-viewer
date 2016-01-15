@@ -10,6 +10,8 @@ simpleDataViewer.controller('dataViewerCtrl', ['$scope', 'dataService', '$log', 
     $scope.selectedTable = null;
     $scope.variables = [];
     $scope.selectedVariable = null;
+    $scope.values = [];
+    $scope.selectedValue = null;
 
     dataService.listTables().then(
         function(response) {
@@ -17,7 +19,7 @@ simpleDataViewer.controller('dataViewerCtrl', ['$scope', 'dataService', '$log', 
             $scope.selectedTable = $scope.tables.length > 0 ? $scope.tables[0] : null;
         },
         function(response) {
-            $log.error('Cannot load tables : ' + response.code);
+            $log.error('Cannot load tables :' + response.code);
         }
     );
 
@@ -31,12 +33,27 @@ simpleDataViewer.controller('dataViewerCtrl', ['$scope', 'dataService', '$log', 
                 function (response) {
                     $scope.variables = [];
                     $scope.selectedVariable = null;
-                    $log.error('Cannot load variables : ' + response.code);
+                    $log.error('Cannot load variables: ' + response.code);
+                }
+            );
+            dataService.listValues(table).then(
+                function (response) {
+                    $scope.values = response.data.columns;
+                    $scope.selectedValue = $scope.values.length > 0 ? $scope.values[0] : null;
+                },
+                function (response) {
+                    $scope.values = [];
+                    $scope.selectedValue = null;
+                    $log.error('Cannot load values: ' + response.code);
                 }
             );
         } else {
             $scope.variables = [];
             $scope.selectedVariable = null;
+            $scope.variables = [];
+            $scope.selectedVariable = null;
+            $scope.values = [];
+            $scope.selectedValue = null;
         }
     });
 
@@ -58,6 +75,9 @@ simpleDataViewer.factory('dataService', ['$http', function($http) {
         },
         listVariables: function(table) {
             return $http.get("/table/" + table.id + "/variable");
+        },
+        listValues: function(table) {
+            return $http.get("/table/" + table.id + "/value");
         }
     };
 }]);

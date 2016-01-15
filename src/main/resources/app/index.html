@@ -2,13 +2,17 @@
 layout: default
 title: Simple Data Viewer
 ng-app: simpleDataViewer
+style: app
 ---
 
 <h1>[[title]]</h1>
 
 <div class="main-panel-content" data-ng-controller="dataViewerCtrl">
-    <label for="dataTable">Table</label><select id="dataTable" data-ng-model="selectedTable" data-ng-options="tableLabel(table) for table in tables"></select>
-    <label for="dataVariable">Variable</label><select id="dataVariable" data-ng-model="selectedVariable" data-ng-options="columnLabel(variable) for variable in variables"></select>
+    <ul class="criteria">
+        <li><label for="dataTable">Table</label><select id="dataTable" data-ng-model="selectedTable" data-ng-options="tableLabel(table) for table in tables"></select></li>
+        <li><label for="dataVariable">Variable</label><select id="dataVariable" data-ng-model="selectedVariable" data-ng-options="columnLabel(variable) for variable in variables"></select></li>
+        <li><label for="dataValue">Value</label><select id="dataValue" data-ng-model="selectedValue" data-ng-options="columnLabel(value) for value in values"></select></li>
+    </ul>
 
     <div class="data">
         <dl>
@@ -16,6 +20,8 @@ ng-app: simpleDataViewer
             <dd>{{tableLabel(selectedTable)}}</dd>
             <dt>Variable</dt>
             <dd>{{columnLabel(selectedVariable)}}</dd>
+            <dt>Value</dt>
+            <dd>{{columnLabel(selectedValue)}}</dd>
         </dl>
     </div>
 </div>
