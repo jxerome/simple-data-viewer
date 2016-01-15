@@ -1,12 +1,21 @@
 ---
 layout: default
 title: Simple Data Viewer
-ng-app: dataviewer
+ng-app: simpleDataViewer
 ---
 
 <h1>[[title]]</h1>
 
+<div class="main-panel-content" data-ng-controller="dataViewerCtrl">
+    <label for="dataTable">Table</label><select id="dataTable" data-ng-model="selectedTable" data-ng-options="tableLabel(table) for table in tables"></select>
 
+    <div class="data">
+        <dl>
+            <dt>Table</dt>
+            <dd>{{tableLabel(selectedTable)}}</dd>
+        </dl>
+    </div>
+</div>
 
-
-[[webjar 'angularjs.min.js']]
+[[webjar 'angular.min.js']]
+[[script 'app']]

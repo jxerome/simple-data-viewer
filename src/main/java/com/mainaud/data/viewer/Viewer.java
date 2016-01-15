@@ -115,7 +115,7 @@ public class Viewer {
         webServer = new WebServer();
         webServer.configure(routes ->
             routes.setIocAdapter(new SpringAdapter(context))
-                .get("/tables", () -> new Response().withTables(dataService.listTables()))
+                .get("/table", () -> new Response().withTables(dataService.listTables()))
         );
 
         if (port == 0) {

@@ -54,7 +54,7 @@ public class ViewerRestApiTest implements FluentRestTest {
 
     @Test
     public void tablesShouldListTables() throws IOException {
-        RestAssert restAssert = get("/tables");
+        RestAssert restAssert = get("/table");
         restAssert.should().succeed().haveType("application/json");
 
         String content = restAssert.response().content();
