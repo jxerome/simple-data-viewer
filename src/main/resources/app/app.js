@@ -12,6 +12,7 @@ simpleDataViewer.controller('dataViewerCtrl', ['$scope', 'dataService', '$log', 
     $scope.selectedVariable = null;
     $scope.values = [];
     $scope.selectedValue = null;
+    $scope.stats = null;
 
     dataService.listTables().then(
         function(response) {
@@ -23,7 +24,13 @@ simpleDataViewer.controller('dataViewerCtrl', ['$scope', 'dataService', '$log', 
         }
     );
 
-    $scope.$watch('selectedTable', function (table, oldTable) {
+    $scope.$watch('selectedTable', function (table) {
+        $scope.variables = [];
+        $scope.selectedVariable = null;
+        $scope.values = [];
+        $scope.selectedValue = null;
+        $scope.stats = null;
+
         if (table) {
             dataService.listVariables(table).then(
                 function (response) {
@@ -31,8 +38,6 @@ simpleDataViewer.controller('dataViewerCtrl', ['$scope', 'dataService', '$log', 
                     $scope.selectedVariable = $scope.variables.length > 0 ? $scope.variables[0] : null;
                 },
                 function (response) {
-                    $scope.variables = [];
-                    $scope.selectedVariable = null;
                     $log.error('Cannot load variables: ' + response.code);
                 }
             );
@@ -42,18 +47,24 @@ simpleDataViewer.controller('dataViewerCtrl', ['$scope', 'dataService', '$log', 
                     $scope.selectedValue = $scope.values.length > 0 ? $scope.values[0] : null;
                 },
                 function (response) {
-                    $scope.values = [];
-                    $scope.selectedValue = null;
                     $log.error('Cannot load values: ' + response.code);
                 }
             );
-        } else {
-            $scope.variables = [];
-            $scope.selectedVariable = null;
-            $scope.variables = [];
-            $scope.selectedVariable = null;
-            $scope.values = [];
-            $scope.selectedValue = null;
+        }
+    });
+
+    $scope.$watchGroup(['selectedVariable', 'selectedValue'], function(values) {
+        if ($scope.selectedVariable && $scope.selectedValue){
+            $scope.stats = null;
+            dataService.loadStats($scope.selectedTable, $scope.selectedVariable, $scope.selectedValue).then(
+                function (response) {
+                    $scope.stats = response.data;
+                    $log.error('stats response : ' + JSON.stringify(response.data));
+                },
+                function (response) {
+                    $log.error('Cannot load stats: ' + response.code);
+                }
+            );
         }
     });
 
@@ -65,6 +76,9 @@ simpleDataViewer.controller('dataViewerCtrl', ['$scope', 'dataService', '$log', 
         return column ? column.name : null;
     };
 
+    $scope.variableValueLabel = function(value) {
+        return angular.isDefined(value) ? value : "(null)";
+    }
 }]);
 
 
@@ -78,6 +92,9 @@ simpleDataViewer.factory('dataService', ['$http', function($http) {
         },
         listValues: function(table) {
             return $http.get("/table/" + table.id + "/value");
+        },
+        loadStats: function(table, variable, value) {
+            return $http.get("/table/" + table.id + "/variable/" + variable.name + "/value/" + value.name + "/stats");
         }
     };
 }]);

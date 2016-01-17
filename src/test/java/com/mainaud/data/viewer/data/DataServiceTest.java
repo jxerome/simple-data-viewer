@@ -10,6 +10,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
@@ -29,7 +30,7 @@ public class DataServiceTest {
     private Path dbpath;
 
     @BeforeClass
-    public void init() throws URISyntaxException {
+    public void init() throws URISyntaxException, IOException {
         dataService = new DataService();
         dbpath = getPath("empty.db");
         result = dataService.openFile(dbpath);

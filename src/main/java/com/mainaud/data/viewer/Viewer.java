@@ -4,9 +4,11 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.mainaud.data.viewer.data.DataService;
+import com.mainaud.data.viewer.data.Stats;
 import com.mainaud.function.Result;
 import net.codestory.http.WebServer;
 import net.codestory.http.injection.SpringAdapter;
+import net.codestory.http.payload.Payload;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -17,6 +19,7 @@ import java.net.URI;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 
 public class Viewer {
@@ -119,6 +122,15 @@ public class Viewer {
                 .get("/table", () -> new Response().withTables(dataService.listTables()))
                 .get("/table/:tableId/variable", (ctx, tableId) -> new Response().withColumns(dataService.listVariableColumns(UUID.fromString(tableId))))
                 .get("/table/:tableId/value", (ctx, tableId) -> new Response().withColumns(dataService.listValueColumns(UUID.fromString(tableId))))
+                .get("/table/:tableId/variable/:variableName/value/:valueName/stats", (ctx, tableId, variableName, valueName) -> {
+                    Result<Stats, Exception> result = dataService.computeStats(UUID.fromString(tableId), variableName, valueName);
+                    if (result.isSuccess()) {
+                        return result.get();
+                    } else {
+                        Exception error = result.getError();
+                        return new Payload("application/json", new Response().withError(error.getMessage()), error instanceof NoSuchElementException ? 404 : 500);
+                    }
+                })
         );
 
         if (port == 0) {

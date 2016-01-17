@@ -1,6 +1,7 @@
 package com.mainaud.data.viewer;
 
 import com.mainaud.data.viewer.data.Column;
+import com.mainaud.data.viewer.data.Stat;
 import com.mainaud.data.viewer.data.Table;
 
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.List;
 public class Response {
     private List<Table> tables;
     private List<Column> columns;
+    private String error;
 
     public Response() {
     }
@@ -36,6 +38,19 @@ public class Response {
 
     public Response withColumns(List<Column> columns) {
         setColumns(columns);
+        return this;
+    }
+
+    public String getError() {
+        return error;
+    }
+
+    public void setError(String error) {
+        this.error = error;
+    }
+
+    public Response withError(String errror) {
+        setError(errror);
         return this;
     }
 }
