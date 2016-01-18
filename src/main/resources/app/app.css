@@ -46,9 +46,25 @@ table.stats {
 
 .stats th, .stats tr.others {
     background-color: #add1ff;
+}
+
+.stats th, .stats .others td {
     padding: 0.5ex;
+}
+
+.stats td {
+    padding-left: 0.5ex;
+    padding-right: 0.5ex;
 }
 
 .number {
     text-align: right;
+}
+
+.message {
+    background-color: #ffe0cb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 3em;
 }

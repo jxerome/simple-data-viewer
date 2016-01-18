@@ -13,6 +13,7 @@ simpleDataViewer.controller('dataViewerCtrl', ['$scope', 'dataService', '$log', 
     $scope.values = [];
     $scope.selectedValue = null;
     $scope.stats = null;
+    $scope.message = 'Waiting for data...';
 
     dataService.listTables().then(
         function(response) {
@@ -56,12 +57,19 @@ simpleDataViewer.controller('dataViewerCtrl', ['$scope', 'dataService', '$log', 
     $scope.$watchGroup(['selectedVariable', 'selectedValue'], function(values) {
         if ($scope.selectedVariable && $scope.selectedValue){
             $scope.stats = null;
+            $scope.message = 'Waiting for data...';
+
             dataService.loadStats($scope.selectedTable, $scope.selectedVariable, $scope.selectedValue).then(
                 function (response) {
                     $scope.stats = response.data;
-                    $log.error('stats response : ' + JSON.stringify(response.data));
+                    if ($scope.hasData($scope.stats.lines)) {
+                        $scope.message = null;
+                    } else {
+                        $scope.message = 'This table is empty';
+                    }
                 },
                 function (response) {
+                    $scope.message = 'Error while loading data';
                     $log.error('Cannot load stats: ' + response.code);
                 }
             );
@@ -78,7 +86,11 @@ simpleDataViewer.controller('dataViewerCtrl', ['$scope', 'dataService', '$log', 
 
     $scope.variableValueLabel = function(value) {
         return angular.isDefined(value) ? value : "(null)";
-    }
+    };
+
+    $scope.hasData = function(array) {
+        return angular.isDefined(array) && array.length > 0;
+    };
 }]);
 
 
