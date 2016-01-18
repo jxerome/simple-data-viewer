@@ -10,9 +10,9 @@ Then clone this repository and launch the maven wrapper.
     git clone https://github.com/jxerome/simple-data-viewer.git
     cd simple-data-viewer
     ./mvnw
-    
+
 Then you can install the application,
- 
+
     SRC=$(pwd)
     cd ~/tmp
     tar xzvf $SRC/target/simple-data-viewer-1.0.tar.gz
@@ -28,10 +28,17 @@ To run the application execute the `sdw` script in `bin` dir.
 Provides it with a list of SQLite files.
 
     sdw my-data1.db my-data2.db
-    
+
 `sdw` will launch a web server on port 8080 and open your default browser on the page.
- 
+
 You can change the default port with option `-p`.
+
+All tables and theirs columns are scanned.
+Columns with type `varchar` are supposed to be a variable column.
+Columns with type `int` are supposed to be data.
+Other columns are ignored.
+
+In the interface, you have to choose one table and then one variable column and one value column.
 
 ## Quit the application
 
