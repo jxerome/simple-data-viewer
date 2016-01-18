@@ -31,4 +31,8 @@ Provides it with a list of SQLite files.
     
 `sdw` will launch a web server on port 8080 and open your default browser on the page.
  
- You can change the default port with option `-p`.
+You can change the default port with option `-p`.
+
+## Quit the application
+
+To quit type `Ctrl-C` in the terminal where you started it or send a `TERM` signal to the process.

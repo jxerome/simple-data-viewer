@@ -156,5 +156,7 @@ public class Viewer {
                 }
             }
         }
+
+        System.out.println("Type Ctrl-C to stop the application");
     }
 }
