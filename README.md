@@ -11,11 +11,15 @@ Then clone this repository and launch the maven wrapper.
     cd simple-data-viewer
     ./mvnw
     
-Then you can install the application.
+Then you can install the application,
  
     SRC=$(pwd)
     cd ~/tmp
     tar xzvf $SRC/target/simple-data-viewer-1.0.tar.gz
+
+and add it to your path.
+
+    export PATH="$(PWD)/bin/:$PATH"
 
 
 ## Run the appplication
@@ -23,7 +27,7 @@ Then you can install the application.
 To run the application execute the `sdw` script in `bin` dir.
 Provides it with a list of SQLite files.
 
-    ./sdw my-data1.db my-data2.db
+    sdw my-data1.db my-data2.db
     
 `sdw` will launch a web server on port 8080 and open your default browser on the page.
  

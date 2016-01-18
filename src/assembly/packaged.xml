@@ -5,6 +5,7 @@
     <formats>
         <format>tar.gz</format>
     </formats>
+    <baseDirectory>${project.build.finalName}</baseDirectory>
     <dependencySets>
         <dependencySet>
             <outputDirectory>lib</outputDirectory>
