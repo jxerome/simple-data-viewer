@@ -9,22 +9,20 @@ style: app
 <h1>[[title]]</h1>
 
 <div class="main-panel-content" data-ng-controller="dataViewerCtrl">
-    <div>
-        <ul class="criteria">
-            <li><label for="dataTable">Table</label><select id="dataTable" data-ng-model="selectedTable" data-ng-options="tableLabel(table) for table in tables"></select></li>
-            <li><label for="dataVariable">Variable</label><select id="dataVariable" data-ng-model="selectedVariable" data-ng-options="columnLabel(variable) for variable in variables"></select></li>
-            <li><label for="dataValue">Value</label><select id="dataValue" data-ng-model="selectedValue" data-ng-options="columnLabel(value) for value in values"></select></li>
-        </ul>
+    <ul class="criteria">
+        <li><label for="dataTable">Table</label><select id="dataTable" data-ng-model="selectedTable" data-ng-options="tableLabel(table) for table in tables"></select></li>
+        <li><label for="dataVariable">Variable</label><select id="dataVariable" data-ng-model="selectedVariable" data-ng-options="columnLabel(variable) for variable in variables"></select></li>
+        <li><label for="dataValue">Value</label><select id="dataValue" data-ng-model="selectedValue" data-ng-options="columnLabel(value) for value in values"></select></li>
+    </ul>
 
-        <div data-ng-if="message" class="message">{{message}}</div>
+    <div data-ng-if="message" class="message">{{message}}</div>
 
-        <table class="stats" data-ng-if="hasData(stats.lines)">
-            <tr><th colspan="3">{{tableLabel(selectedTable)}}</th></tr>
-            <tr><th>{{columnLabel(selectedVariable)}}</th><th>Count</th><th>Average {{columnLabel(selectedValue)}}</th></tr>
-            <tr data-ng-repeat="line in stats.lines"><td>{{variableValueLabel(line.variable)}}</td><td class="number">{{line.count}}</td><td class="number">{{line.average | number : 3}}</td></tr>
-            <tr data-ng-if="stats.others" class="others"><td>Other values</td><td class="number">{{stats.others.count}}</td><td class="number">{{stats.others.average | number : 3}}</td></tr>
-        </table>
-    </div>
+    <table class="stats" data-ng-if="hasData(stats.lines)">
+        <tr><th colspan="3">{{tableLabel(selectedTable)}}</th></tr>
+        <tr><th>{{columnLabel(selectedVariable)}}</th><th>Count</th><th>Average {{columnLabel(selectedValue)}}</th></tr>
+        <tr data-ng-repeat="line in stats.lines"><td>{{variableValueLabel(line.variable)}}</td><td class="number">{{line.count}}</td><td class="number">{{line.average | number : 3}}</td></tr>
+        <tr data-ng-if="stats.others" class="others"><td>Other values</td><td class="number">{{stats.others.count}}</td><td class="number">{{stats.others.average | number : 3}}</td></tr>
+    </table>
 </div>
 
 [[webjar 'angular.min.js']]
