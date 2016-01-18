@@ -19,7 +19,7 @@ Then you can install the application,
 
 and add it to your path.
 
-    export PATH="$(PWD)/bin/:$PATH"
+    export PATH="$(PWD)/simple-data-viewer-1.0/bin/:$PATH"
 
 
 ## Run the appplication
