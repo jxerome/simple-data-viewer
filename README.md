@@ -15,16 +15,16 @@ Then you can install the application.
  
     SRC=$(pwd)
     cd ~/tmp
-    tar xzvf $SRC/target/data-viewer-1.0.tar.gz
+    tar xzvf $SRC/target/simple-data-viewer-1.0.tar.gz
 
 
 ## Run the appplication
 
-To run the application execute the `dw` script in `bin` dir.
+To run the application execute the `sdw` script in `bin` dir.
 Provides it with a list of SQLite files.
 
-    ./dw my-data1.db my-data2.db
+    ./sdw my-data1.db my-data2.db
     
-`dw` will launch a web server on port 8080 and open your default browser on the page.
+`sdw` will launch a web server on port 8080 and open your default browser on the page.
  
  You can change the default port with option `-p`.
