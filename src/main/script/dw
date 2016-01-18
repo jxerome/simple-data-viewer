@@ -1,0 +1,27 @@
+#!/bin/bash
+
+#
+# Search for real install dir
+# This support le lake of -f option in Mac OS X readlink
+#
+function find_sdv_home() {
+    local path=$1
+    local saved_wd=$(pwd)
+
+    cd $(dirname $path)
+
+    while [[ -L "$path" ]]; do
+        path=$(readlink $path)
+        cd $(dirname $path)
+    done
+
+    echo $(dirname $(pwd -P))
+
+    cd $saved_wd
+}
+
+if [[ -z $SDV_HOME ]]; then
+    SDV_HOME=$(find_sdv_home $0)
+fi
+
+java -cp "$SDV_HOME/lib/*" -DPROD_MODE=true com.mainaud.data.viewer.Viewer "$@"
